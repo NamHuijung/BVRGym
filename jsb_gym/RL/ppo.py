@@ -76,7 +76,7 @@ class ActorCritic(nn.Module):
 
     def set_device(self, use_gpu = False):
         if use_gpu:
-            self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+            self.device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
         else:
             self.device = "cpu"
 
@@ -86,6 +86,8 @@ class ActorCritic(nn.Module):
     
     def act(self, state, memory, gready):
         action_mean = self.actor(state)
+        if torch.isnan(action_mean).any():
+            print(f"NaN in action_mean : {action_mean}")
         if not gready:
             cov_mat = torch.diag(self.action_var).to(self.device)
             dist = MultivariateNormal(action_mean, cov_mat)
@@ -104,6 +106,8 @@ class ActorCritic(nn.Module):
     def evaluate(self, state, action):   
         # action mean, get the 3 actions from NN
         action_mean = self.actor(state)
+        if torch.isnan(action_mean).any():
+            print(f"NaN in eval_action_mean : {action_mean}")
         #print(action_mean)
         # [0.25, 0.25 , 0.25]. Expand this tesor to same size as other
         action_var = self.action_var.expand_as(action_mean)
@@ -145,7 +149,7 @@ class PPO:
     
     def set_device(self, use_gpu = True, set_policy = False):
         if use_gpu:
-            self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+            self.device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
         else:
             self.device = "cpu"
 
@@ -163,6 +167,8 @@ class PPO:
 
     def select_action(self, state, memory, gready = False):
         state = torch.FloatTensor(state.reshape(1, -1)).to(self.device)
+        if torch.isnan(state).any():
+            print(f"NaN in state : {state}")
         return self.policy_old.act(state, memory, gready).cpu().data.numpy().flatten()
     
     def estimate_action(self, state, action):

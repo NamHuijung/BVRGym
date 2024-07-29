@@ -440,18 +440,18 @@ class AIM(object):
     def is_alive(self):
         return self.alive
 
-    def is_done(self):
+    def is_done(self, name=None):
         # check is missile too slow 
         if self.is_mach_low():
-            print('Lost: Mach low')
+            print(f'{name}_Lost: Mach low')
             self.set_target_lost()
 
         if self.is_alt_low():
-            print('Hit ground')
+            print(f'{name}_Hit ground')
             self.set_target_lost()
 
         if self.is_target_lost():
-            print('Lost target')
+            print(f'{name}_Lost target')
             self.set_target_lost()
 
         if self.is_within_warhead_range():
@@ -459,12 +459,12 @@ class AIM(object):
         
         self.position_tgt_NED_norm_old = self.position_tgt_NED_norm
         
-    def step_evasive(self):
+    def step_evasive(self, name=None):
         #
         for _ in self.r_tick:
             #print(round(self.get_sim_time_sec()), round(self.get_Mach(), 2))
             self.step_PN()
-            self.is_done()
+            self.is_done(name)
         self.count += 1
 
     def step_PN(self):
